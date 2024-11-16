@@ -65,7 +65,7 @@ export default {
             request.method === "HEAD" ||
             request.method === "POST"
         ) {
-            const url = request.url;
+            const url = new URL(request.url);
 
             if (url.includes("/search/")) {
                 const headers = request.headers;
