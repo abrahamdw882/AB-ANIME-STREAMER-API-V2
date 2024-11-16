@@ -220,6 +220,99 @@ export default {
                 return new Response(json, {
                     headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
                 });
+                
+            } else if (url.includes("/download/")) {
+                const headers = request.headers;
+                await increaseViews(headers);
+                
+                const query = url.split("/download/")[1];
+                const timeValue = CACHE["timeValue"];
+                const cookieValue = CACHE["cookieValue"];
+
+                var cookie = "";
+
+                if (timeValue != null && cookieValue != null) {
+                    var fekk = Math.floor(Date.now() / 1000);
+                    var timeDiff = fekk - timeValue;
+
+                    if (timeDiff > 10 * 60) {
+                        cookie = await getGogoAuthKey();
+                        CACHE.cookieValue = cookie;
+                    } else {
+                        cookie = cookieValue;
+                    }
+                } else {
+                    var fek = Math.floor(Date.now() / 1000);
+                    CACHE.timeValue = fek;
+                    cookie = await getGogoAuthKey();
+                    CACHE.cookieValue = cookie;
+                }
+
+                const data = await GogoDLScrapper(query, cookie);
+                const workerUrl = `${url.protocol}//${url.hostname}`;
+        
+                if (data.stream?.sources) {
+                    data.stream.sources = data.stream.sources.map(source => ({
+                        ...source,
+                        file: `${workerUrl}/stream?url=${encodeURIComponent(source.file)}`
+                    }));
+                }
+        
+                if (data.stream?.sources_bk) {
+                    data.stream.sources_bk = data.stream.sources_bk.map(source => ({
+                        ...source,
+                        file: `${workerUrl}/stream?url=${encodeURIComponent(source.file)}`
+                    }));
+                }
+
+                const json = JSON.stringify({ results: data });
+                return new Response(json, {
+                    headers: { 
+                        "Access-Control-Allow-Origin": "*", 
+                        "Vary": "Origin",
+                        "Content-Type": "application/json"
+                    },
+                });
+            } else if (url.pathname.startsWith('/stream')) {
+                const originalUrl = url.searchParams.get('url');
+        if (!originalUrl) {
+            return new Response('Missing url parameter', { status: 400 });
+        }
+
+        const response = await fetch(originalUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+        });
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/vnd.apple.mpegurl')) {
+            const text = await response.text();
+            const lines = text.split('\n');
+            const newLines = lines.map(line => {
+                if (line.startsWith('https://') || (line.startsWith('http://'))) {
+                    return `${url.protocol}//${url.hostname}/stream?url=${encodeURIComponent(line.trim())}`;
+                }
+                return line;
+            });
+
+            return new Response(newLines.join('\n'), {
+                headers: {
+                    'Content-Type': 'application/vnd.apple.mpegurl',
+                    'Access-Control-Allow-Origin': '*',
+                }
+            });
+        }
+
+        return new Response(response.body, {
+            headers: {
+                'Content-Type': response.headers.get('content-type') || 'video/MP2T',
+                'Access-Control-Allow-Origin': '*',
+            }
+        });
+
+
+          /*      
             } else if (url.includes("/download/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -252,7 +345,8 @@ export default {
                 const json = JSON.stringify({ results: data });
                 return new Response(json, {
                     headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                });*/
+            
             } else if (url.includes("/recent/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
