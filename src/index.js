@@ -27,13 +27,21 @@ let GP_CACHE = {};
 let AT_CACHE = {};
 
 // For Fixing CORS issue
-// CORS Fix Start
+function addCorsHeaders(response) {
+    const corsHeaders = {
+        "Access-Control-Allow-Origin": "*",  // Allow all origins
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",  // Allow these methods
+        "Access-Control-Allow-Headers": "Content-Type",  // Allow content-type headers
+    };
 
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-};
+    // Ensure we add the CORS headers to every response
+    const headers = response.headers || {};
+    Object.keys(corsHeaders).forEach(key => {
+        headers[key] = corsHeaders[key];
+    });
+    return new Response(response.body, { ...response, headers });
+}
+
 
 function handleOptions(request) {
     if (
@@ -92,9 +100,7 @@ export default {
                         const json = JSON.stringify({
                             results: SEARCH_CACHE[query + page.toString()],
                         });
-                        return new Response(json, {
-                            headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                        });
+                        return addCorsHeaders(new Response(json));
                     }
                 }
                 const data = await getSearch(query, page);
@@ -109,9 +115,7 @@ export default {
                 );
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             } else if (url.includes("/home")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -123,9 +127,7 @@ export default {
                         const json = JSON.stringify({
                             results: HOME_CACHE["data"],
                         });
-                        return new Response(json, {
-                            headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                        });
+                         return addCorsHeaders(new Response(json));
                     }
                 }
                 let anilistTrending = [];
@@ -169,9 +171,7 @@ export default {
                         const json = JSON.stringify({
                             results: data,
                         });
-                        return new Response(json, {
-                            headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                        });
+                         return addCorsHeaders(new Response(json));
                     }
                 }
                 let data;
@@ -206,9 +206,7 @@ export default {
                 }
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                return addCorsHeaders(new Response(json));
             } else if (url.includes("/episode/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -217,9 +215,7 @@ export default {
                 const data = await getEpisode(id);
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             } else if (url.includes("/download/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -250,9 +246,7 @@ export default {
                 const data = await GogoDLScrapper(query, cookie);
 
                 const json = JSON.stringify({ results: data });
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             } else if (url.includes("/recent/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -266,9 +260,7 @@ export default {
                         const json = JSON.stringify({
                             results: RECENT_CACHE[page],
                         });
-                        return new Response(json, {
-                            headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                        });
+                         return addCorsHeaders(new Response(json));
                     }
                 }
 
@@ -282,9 +274,7 @@ export default {
                 RECENT_CACHE[page] = data;
                 RECENT_CACHE[`time_${page}`] = Math.floor(Date.now() / 1000);
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             } else if (url.includes("/recommendations/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -295,9 +285,7 @@ export default {
                     const json = JSON.stringify({
                         results: REC_CACHE[query],
                     });
-                    return new Response(json, {
-                        headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                    });
+                     return addCorsHeaders(new Response(json));
                 }
 
                 const search = await getAnilistSearch(query);
@@ -312,9 +300,7 @@ export default {
                 REC_CACHE[query] = data;
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             } else if (url.includes("/gogoPopular/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -328,9 +314,7 @@ export default {
                         const json = JSON.stringify({
                             results: GP_CACHE[page],
                         });
-                        return new Response(json, {
-                            headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                        });
+                         return addCorsHeaders(new Response(json));
                     }
                 }
 
@@ -339,9 +323,7 @@ export default {
 
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             } else if (url.includes("/upcoming/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
@@ -355,9 +337,7 @@ export default {
                         const json = JSON.stringify({
                             results: AT_CACHE[page],
                         });
-                        return new Response(json, {
-                            headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                        });
+                        return addCorsHeaders(new Response(json));
                     }
                 }
 
@@ -367,9 +347,7 @@ export default {
 
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                 return addCorsHeaders(new Response(json));
             }
 
             const text =
