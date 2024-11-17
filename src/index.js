@@ -153,9 +153,7 @@ export default {
                 }
                 const json = JSON.stringify({ results: data });
 
-                return new Response(json, {
-                    headers: { "Access-Control-Allow-Origin": "*", Vary: "Origin" },
-                });
+                return addCorsHeaders(new Response(json));
             } else if (url.includes("/anime/")) {
                 const headers = request.headers;
                 await increaseViews(headers);
