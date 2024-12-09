@@ -7,7 +7,7 @@ import {
   } from "./gogo_extractor.js";
  import * as cheerio from "cheerio";
 
-  const BaseURL = ["https://gogoanime.me.in"]; 
+  const BaseURL = ["https://gogoanime.me.in","https://www1.gogoanime.co.ba/"]; 
   const USER_AGENT =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36";
   
