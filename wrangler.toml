@@ -1,4 +1,4 @@
-name = "ab-stream-apiv2"
+name = "ab-streams-apiv2"
 main = "src/index.js"
 compatibility_date = "2023-10-10"
 type = "javascript"
